@@ -29,14 +29,23 @@ def save_content(url, path):
 
 def main():
     load_dotenv()
-    vk_id = os.getenv("VK_APP_ID")
-    comix_id = 353
-    url = f"https://xkcd.com/{comix_id}/info.0.json"
-    comix_meta = get_comix_meta(url)
-    img_url = comix_meta["img"]
-    img_path = compose_filepath(img_url)
-    save_content(img_url, img_path)
-    print(comix_meta["alt"])
+    access_token = os.getenv("VK_ACCESS_TOKEN")
+    # comix_id = 353
+    # xkcd_url = f"https://xkcd.com/{comix_id}/info.0.json"
+    # comix_meta = get_comix_meta(xkcd_url)
+    # img_url = comix_meta["img"]
+    # img_path = compose_filepath(img_url)
+    # save_content(img_url, img_path)
+    # print(comix_meta["alt"])
+    vk_api_method = "groups.get"
+    api_url = f"https://api.vk.com/method/{vk_api_method}"
+    params = {
+        "access_token": access_token,
+        "v": 5.131,
+    }
+    response = requests.get(api_url, params=params)
+    response.raise_for_status()
+    print(response.json())
 
 
 if __name__ == "__main__":
