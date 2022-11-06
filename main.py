@@ -39,21 +39,15 @@ def fetch_comix():
     return img_path
 
 
-def get_upload_url(access_token):
-    api_url = "https://api.vk.com/"
-    api_version = 5.131
+def get_upload_url(api_url, params):
     method = "photos.getWallUploadServer"
-    params = {
-        "access_token": access_token,
-        "v": api_version,
-    }
     method_url = f"{api_url}method/{method}"
     response = requests.get(method_url, params=params)
     response.raise_for_status()
     return response.json()["response"]["upload_url"]
 
 
-def upload_to_vk_server(upload_url, group_id, pic_path):
+def upload_to_server(upload_url, group_id, pic_path):
     with open(Path(pic_path), "rb") as file:
         method = "photos.saveWallPhoto"
         files = {
@@ -65,16 +59,32 @@ def upload_to_vk_server(upload_url, group_id, pic_path):
         method_url = f"{upload_url}{method}"
         response = requests.post(method_url, files=files, params=params)
         response.raise_for_status()
-        print(response.json())
+    return response.json()
+
+
+def save_to_album(api_url, params, upload_response):
+    method = "photos.saveWallPhoto"
+    params = params | upload_response
+    method_url = f"{api_url}method/{method}"
+    response = requests.get(method_url, params=params)
+    response.raise_for_status()
+    print(response.json())
 
 
 def main():
     load_dotenv()
     access_token = os.getenv("VK_ACCESS_TOKEN")
     group_id = os.getenv("VK_GROUP_ID")
+    api_url = "https://api.vk.com/"
+    api_version = 5.131
+    params = {
+        "access_token": access_token,
+        "v": api_version,
+    }
     pic_path = fetch_comix()
-    upload_url = get_upload_url(access_token)
-    upload_to_vk_server(upload_url, group_id, pic_path)
+    upload_url = get_upload_url(api_url, params)
+    upload_response = upload_to_server(upload_url, group_id, pic_path)
+    save_to_album(api_url, params, upload_response)
 
 
 if __name__ == "__main__":
