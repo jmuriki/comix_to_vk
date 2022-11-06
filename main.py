@@ -27,25 +27,54 @@ def save_content(url, path):
         file.write(response.content)
 
 
+def fetch_comix():
+    xkcd_url = "https://xkcd.com/"
+    comix_id = 353
+    comix_url = f"{xkcd_url}{comix_id}/info.0.json"
+    comix_meta = get_comix_meta(comix_url)
+    img_url = comix_meta["img"]
+    img_path = compose_filepath(img_url)
+    save_content(img_url, img_path)
+    print(comix_meta["alt"])
+    return img_path
+
+
+def get_upload_url(access_token):
+    api_url = "https://api.vk.com/"
+    api_version = 5.131
+    method = "photos.getWallUploadServer"
+    params = {
+        "access_token": access_token,
+        "v": api_version,
+    }
+    method_url = f"{api_url}method/{method}"
+    response = requests.get(method_url, params=params)
+    response.raise_for_status()
+    return response.json()["response"]["upload_url"]
+
+
+def upload_to_vk_server(upload_url, group_id, pic_path):
+    with open(Path(pic_path), "rb") as file:
+        method = "photos.saveWallPhoto"
+        files = {
+            "photo": file,
+        }
+        params = {
+            "group_id": group_id,
+        }
+        method_url = f"{upload_url}{method}"
+        response = requests.post(method_url, files=files, params=params)
+        response.raise_for_status()
+        print(response.json())
+
+
 def main():
     load_dotenv()
     access_token = os.getenv("VK_ACCESS_TOKEN")
-    # comix_id = 353
-    # xkcd_url = f"https://xkcd.com/{comix_id}/info.0.json"
-    # comix_meta = get_comix_meta(xkcd_url)
-    # img_url = comix_meta["img"]
-    # img_path = compose_filepath(img_url)
-    # save_content(img_url, img_path)
-    # print(comix_meta["alt"])
-    vk_api_method = "groups.get"
-    api_url = f"https://api.vk.com/method/{vk_api_method}"
-    params = {
-        "access_token": access_token,
-        "v": 5.131,
-    }
-    response = requests.get(api_url, params=params)
-    response.raise_for_status()
-    print(response.json())
+    group_id = os.getenv("VK_GROUP_ID")
+    pic_path = fetch_comix()
+    upload_url = get_upload_url(access_token)
+    upload_to_vk_server(upload_url, group_id, pic_path)
 
 
 if __name__ == "__main__":
