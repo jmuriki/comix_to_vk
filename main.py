@@ -32,6 +32,7 @@ def main():
     img_url = comix_meta["img"]
     img_path = compose_filepath(img_url)
     save_content(img_url, img_path)
+    print(comix_meta["alt"])
 
 
 if __name__ == "__main__":
