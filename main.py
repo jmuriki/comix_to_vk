@@ -1,6 +1,8 @@
+import os
 import requests
 
 from pathlib import Path
+from dotenv import load_dotenv
 from urllib.parse import urlparse
 from urllib.parse import unquote
 
@@ -26,6 +28,8 @@ def save_content(url, path):
 
 
 def main():
+    load_dotenv()
+    vk_id = os.getenv("VK_APP_ID")
     comix_id = 353
     url = f"https://xkcd.com/{comix_id}/info.0.json"
     comix_meta = get_comix_meta(url)
