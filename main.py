@@ -1,4 +1,5 @@
 import os
+import random
 import requests
 
 from pathlib import Path
@@ -7,16 +8,21 @@ from urllib.parse import urlparse
 from urllib.parse import unquote
 
 
-def compile_comix_url(comix_id):
+def compile_comic_url(comic_id=""):
     xkcd_url = "https://xkcd.com/"
-    comix_url = f"{xkcd_url}{comix_id}/info.0.json"
-    return comix_url
+    return f"{xkcd_url}{comic_id}/info.0.json"
 
 
-def get_comix_meta(url):
+def get_comic_meta(url):
     repsonse = requests.get(url)
     repsonse.raise_for_status()
     return repsonse.json()
+
+
+def get_last_comic_id():
+    url = compile_comic_url()
+    comic_meta = get_comic_meta(url)
+    return comic_meta["num"]
 
 
 def compose_filepath(url):
@@ -34,14 +40,15 @@ def save_content(url, path):
         return path
 
 
-def fetch_comix():
-    comix_id = 353
-    comix_url = compile_comix_url(comix_id)
-    comix_meta = get_comix_meta(comix_url)
-    image_url = comix_meta["img"]
+def fetch_random_comic():
+    total_comics = get_last_comic_id()
+    comic_id = random.randint(1, total_comics)
+    comic_url = compile_comic_url(comic_id)
+    comic_meta = get_comic_meta(comic_url)
+    image_url = comic_meta["img"]
     image_path = compose_filepath(image_url)
     image = save_content(image_url, image_path)
-    text = comix_meta["alt"]
+    text = comic_meta["alt"]
     return image, text
 
 
@@ -104,7 +111,7 @@ def main():
     load_dotenv()
     group_id = os.getenv("VK_GROUP_ID")
     token = os.getenv("VK_ACCESS_TOKEN")
-    image, text = fetch_comix()
+    image, text = fetch_random_comic()
     publish_to_vk(group_id, token, image, text)
 
 
