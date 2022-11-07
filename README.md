@@ -1,6 +1,8 @@
 # comix_to_vk
 
-Данный проект помогает автоматизировать процесс скачивания и размещения комиксов [xkcd](https://xkcd.com) на стене вашей vk-группы.
+Данный проект помогает автоматизировать процесс скачивания и публикации комиксов [xkcd](https://xkcd.com).
+
+При каждом запуске выбирает случайным образом один комикс из коллекции и выкладывает его на стене вашей vk-группы.
 
 
 ## Установка
@@ -37,9 +39,9 @@ pip3 install -r requirements.txt
 
 Пройдите процедуру [Implicit Flow](https://vk.com/dev/implicit_flow_user), используя браузерную строку:
 - не используйте параметр `redirect_uri` ;
-- вставьте `client_id` [своего приложения](https://vk.com/apps?act=manage) (можно найти в адресной строке) ;
-- встатьте `scope=photos,groups,wall,offline` ;
-- вставьте `response_type=token` .
+- вставьте параметр `client_id` со значением [id своего приложения](https://vk.com/apps?act=manage) (можно найти в адресной строке) ;
+- встатьте параметр `scope` со значениями `photos,groups,wall,offline` ;
+- вставьте параметр `response_type` со значением `token` .
 
 ```
 https://oauth.vk.com/authorize?client_id=XХХХХХХХ&scope=photos,groups,wall,offline&response_type=token
