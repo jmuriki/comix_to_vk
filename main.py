@@ -113,7 +113,7 @@ def main():
     token = os.getenv("VK_ACCESS_TOKEN")
     image, text = fetch_random_comic()
     publish_to_vk(group_id, token, image, text)
-
+    os.remove(image)
 
 if __name__ == "__main__":
     main()
