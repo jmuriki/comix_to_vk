@@ -76,7 +76,7 @@ def save_to_album(api_url, params, upload_response):
     method = "photos.saveWallPhoto"
     params = params | upload_response
     method_url = f"{api_url}method/{method}"
-    response = requests.get(method_url, params=params)
+    response = requests.post(method_url, params=params)
     response.raise_for_status()
     return response.json()
 
