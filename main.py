@@ -128,9 +128,12 @@ def main():
     token = os.getenv("VK_ACCESS_TOKEN")
     image_url, image_alt = fetch_random_comic()
     image_path = compose_filepath(image_url)
-    image = save_content(image_url, image_path)
-    publish_to_vk(group_id, token, image, image_alt)
-    os.remove(image)
+    try:
+        image = save_content(image_url, image_path)
+        publish_to_vk(group_id, token, image, image_alt)
+    finally:
+        os.remove(image)
+
 
 if __name__ == "__main__":
     main()
