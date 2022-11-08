@@ -27,7 +27,7 @@ def save_content(url, path):
     response.raise_for_status()
     with open(path, "wb") as file:
         file.write(response.content)
-        return path
+    return path
 
 
 def fetch_random_comic():
@@ -52,15 +52,15 @@ def get_upload_url(api_url, params):
 
 
 def upload_to_server(upload_url, image):
+    method = "photos.saveWallPhoto"
+    method_url = f"{upload_url}{method}"
     with open(image, "rb") as file:
-        method = "photos.saveWallPhoto"
         files = {
             "photo": file,
         }
-        method_url = f"{upload_url}{method}"
         response = requests.post(method_url, files=files)
-        response.raise_for_status()
-        return response.json()
+    response.raise_for_status()
+    return response.json()
 
 
 def save_to_album(api_url, params, upload_response):
