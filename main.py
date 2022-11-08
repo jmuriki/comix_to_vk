@@ -38,9 +38,12 @@ def save_content(url, path):
     return path
 
 
-def get_upload_url(api_url, params):
+def get_upload_url(api_url, token, api_version):
     method = "photos.getWallUploadServer"
     method_url = f"{api_url}method/{method}"
+    params = {}
+    params["access_token"] = token
+    params["v"] = api_version
     response = requests.get(method_url, params=params)
     response.raise_for_status()
     return response.json()["response"]["upload_url"]
@@ -58,39 +61,65 @@ def upload_to_server(upload_url, image):
     return response.json()
 
 
-def save_to_album(api_url, params, upload_response):
+def save_to_album(api_url, token, api_version, img_server, img_photo, img_hash):
     method = "photos.saveWallPhoto"
-    params = params | upload_response
     method_url = f"{api_url}method/{method}"
+    params = {}
+    params["access_token"] = token
+    params["v"] = api_version
+    params["server"] = img_server
+    params["photo"] = img_photo
+    params["hash"] = img_hash
     response = requests.post(method_url, params=params)
     response.raise_for_status()
     return response.json()
 
 
-def post_to_the_wall(api_url, params, save_response, group_id, text):
+def post_to_the_wall(api_url, token, api_version, owner_id, media_id, group_id, image_alt):
     method = "wall.post"
     method_url = f"{api_url}method/{method}"
-    owner_id = save_response["response"][0]["owner_id"]
-    media_id = save_response["response"][0]["id"]
+    params = {}
+    params["access_token"] = token
+    params["v"] = api_version
     params["owner_id"] = f"-{group_id}"
-    params["message"] = text
+    params["message"] = image_alt
     params["from_group"] = 1
     params["attachments"] = f"photo{owner_id}_{media_id}"
     response = requests.get(method_url, params=params)
     response.raise_for_status()
 
 
-def publish_to_vk(group_id, token, image, text):
+def publish_to_vk(group_id, token, image, image_alt):
     api_url = "https://api.vk.com/"
     api_version = 5.131
-    params = {
-        "access_token": token,
-        "v": api_version,
-    }
-    upload_url = get_upload_url(api_url, params)
+    upload_url = get_upload_url(
+        api_url,
+        token,
+        api_version,
+    )
     upload_response = upload_to_server(upload_url, image)
-    save_response = save_to_album(api_url, params, upload_response)
-    post_to_the_wall(api_url, params, save_response, group_id, text)
+    img_server = upload_response["server"]
+    img_photo = upload_response["photo"]
+    img_hash = upload_response["hash"]
+    save_response = save_to_album(
+        api_url,
+        token,
+        api_version,
+        img_server,
+        img_photo,
+        img_hash,
+    )
+    owner_id = save_response["response"][0]["owner_id"]
+    media_id = save_response["response"][0]["id"]
+    post_to_the_wall(
+        api_url,
+        token,
+        api_version,
+        owner_id,
+        media_id,
+        group_id,
+        image_alt,
+    )
 
 
 def main():
