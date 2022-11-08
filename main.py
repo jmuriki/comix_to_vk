@@ -8,11 +8,19 @@ from urllib.parse import urlparse
 from urllib.parse import unquote
 
 
-def get_last_comic_id():
-    url = "https://xkcd.com/info.0.json"
-    response = requests.get(url)
+def fetch_random_comic():
+    url = "https://xkcd.com/"
+    info_path = "/info.0.json"
+    response = requests.get(f"{url}{info_path}")
     response.raise_for_status()
-    return response.json()["num"]
+    total_comics = response.json()["num"]
+    comic_id = random.randint(1, total_comics)
+    response = requests.get(f"{url}{comic_id}{info_path}")
+    response.raise_for_status()
+    comic_meta = response.json()
+    image_url = comic_meta["img"]
+    image_alt = comic_meta["alt"]
+    return image_url, image_alt
 
 
 def compose_filepath(url):
@@ -28,19 +36,6 @@ def save_content(url, path):
     with open(path, "wb") as file:
         file.write(response.content)
     return path
-
-
-def fetch_random_comic():
-    total_comics = get_last_comic_id()
-    comic_id = random.randint(1, total_comics)
-    comic_url = f"https://xkcd.com/{comic_id}/info.0.json"
-    repsonse = requests.get(comic_url)
-    repsonse.raise_for_status()
-    text = repsonse.json()["alt"]
-    image_url = repsonse.json()["img"]
-    image_path = compose_filepath(image_url)
-    image = save_content(image_url, image_path)
-    return image, text
 
 
 def get_upload_url(api_url, params):
@@ -102,8 +97,10 @@ def main():
     load_dotenv()
     group_id = os.getenv("VK_GROUP_ID")
     token = os.getenv("VK_ACCESS_TOKEN")
-    image, text = fetch_random_comic()
-    publish_to_vk(group_id, token, image, text)
+    image_url, image_alt = fetch_random_comic()
+    image_path = compose_filepath(image_url)
+    image = save_content(image_url, image_path)
+    publish_to_vk(group_id, token, image, image_alt)
     os.remove(image)
 
 if __name__ == "__main__":
