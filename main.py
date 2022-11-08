@@ -8,11 +8,6 @@ from urllib.parse import urlparse
 from urllib.parse import unquote
 
 
-def compile_comic_url(comic_id=""):
-    xkcd_url = "https://xkcd.com/"
-    return f"{xkcd_url}{comic_id}/info.0.json"
-
-
 def get_comic_meta(url):
     repsonse = requests.get(url)
     repsonse.raise_for_status()
@@ -20,7 +15,7 @@ def get_comic_meta(url):
 
 
 def get_last_comic_id():
-    url = compile_comic_url()
+    url = "https://xkcd.com/info.0.json"
     comic_meta = get_comic_meta(url)
     return comic_meta["num"]
 
@@ -43,7 +38,7 @@ def save_content(url, path):
 def fetch_random_comic():
     total_comics = get_last_comic_id()
     comic_id = random.randint(1, total_comics)
-    comic_url = compile_comic_url(comic_id)
+    comic_url = f"https://xkcd.com/{comic_id}/info.0.json"
     comic_meta = get_comic_meta(comic_url)
     image_url = comic_meta["img"]
     image_path = compose_filepath(image_url)
