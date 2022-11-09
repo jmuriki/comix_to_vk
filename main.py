@@ -35,7 +35,6 @@ def save_content(url, path):
     response.raise_for_status()
     with open(path, "wb") as file:
         file.write(response.content)
-    return path
 
 
 def check_for_vk_error(response):
@@ -152,8 +151,8 @@ def main():
     image_url, image_alt = fetch_random_comic()
     image_path = compose_filepath(image_url)
     try:
-        image = save_content(image_url, image_path)
-        publish_to_vk(group_id, token, image, image_alt)
+        save_content(image_url, image_path)
+        publish_to_vk(group_id, token, image_path, image_alt)
     except requests.HTTPError:
         raise
     finally:
