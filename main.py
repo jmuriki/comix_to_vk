@@ -49,9 +49,10 @@ def check_for_vk_error(response):
 def get_upload_url(api_url, token, api_version):
     method = "photos.getWallUploadServer"
     method_url = f"{api_url}method/{method}"
-    params = {}
-    params["access_token"] = token
-    params["v"] = api_version
+    params = {
+        "access_token": token,
+        "v": api_version,
+    }
     response = requests.get(method_url, params=params)
     response.raise_for_status()
     error = check_for_vk_error(response)
@@ -78,12 +79,13 @@ def upload_to_server(upload_url, image):
 def save_to_album(api_url, token, api_version, img_server, img_photo, img_hash):
     method = "photos.saveWallPhoto"
     method_url = f"{api_url}method/{method}"
-    params = {}
-    params["access_token"] = token
-    params["v"] = api_version
-    params["server"] = img_server
-    params["photo"] = img_photo
-    params["hash"] = img_hash
+    params = {
+        "access_token": token,
+        "v": api_version,
+        "server": img_server,
+        "photo": img_photo,
+        "hash": img_hash,
+    }
     response = requests.post(method_url, params=params)
     response.raise_for_status()
     error = check_for_vk_error(response)
@@ -95,13 +97,14 @@ def save_to_album(api_url, token, api_version, img_server, img_photo, img_hash):
 def post_to_the_wall(api_url, token, api_version, owner_id, media_id, group_id, image_alt):
     method = "wall.post"
     method_url = f"{api_url}method/{method}"
-    params = {}
-    params["access_token"] = token
-    params["v"] = api_version
-    params["owner_id"] = f"-{group_id}"
-    params["message"] = image_alt
-    params["from_group"] = 1
-    params["attachments"] = f"photo{owner_id}_{media_id}"
+    params = {
+        "access_token": token,
+        "v": api_version,
+        "owner_id": f"-{group_id}",
+        "message": image_alt,
+        "from_group": 1,
+        "attachments": f"photo{owner_id}_{media_id}",
+    }
     response = requests.get(method_url, params=params)
     response.raise_for_status()
     error = check_for_vk_error(response)
