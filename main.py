@@ -38,6 +38,14 @@ def save_content(url, path):
     return path
 
 
+def check_for_vk_error(response):
+    if response.json().get("error"):
+        code = response.json()["error"].get("error_code")
+        msg = response.json()["error"]["error_msg"]
+        return f"[VK Error: {code}] {msg}" if code else msg
+    return
+
+
 def get_upload_url(api_url, token, api_version):
     method = "photos.getWallUploadServer"
     method_url = f"{api_url}method/{method}"
@@ -46,6 +54,9 @@ def get_upload_url(api_url, token, api_version):
     params["v"] = api_version
     response = requests.get(method_url, params=params)
     response.raise_for_status()
+    error = check_for_vk_error(response)
+    if error:
+        raise requests.HTTPError(error)
     return response.json()["response"]["upload_url"]
 
 
@@ -58,6 +69,9 @@ def upload_to_server(upload_url, image):
         }
         response = requests.post(method_url, files=files)
     response.raise_for_status()
+    error = check_for_vk_error(response)
+    if error:
+        raise requests.HTTPError(error)
     return response.json()
 
 
@@ -72,6 +86,9 @@ def save_to_album(api_url, token, api_version, img_server, img_photo, img_hash):
     params["hash"] = img_hash
     response = requests.post(method_url, params=params)
     response.raise_for_status()
+    error = check_for_vk_error(response)
+    if error:
+        raise requests.HTTPError(error)
     return response.json()
 
 
@@ -87,6 +104,9 @@ def post_to_the_wall(api_url, token, api_version, owner_id, media_id, group_id, 
     params["attachments"] = f"photo{owner_id}_{media_id}"
     response = requests.get(method_url, params=params)
     response.raise_for_status()
+    error = check_for_vk_error(response)
+    if error:
+        raise requests.HTTPError(error)
 
 
 def publish_to_vk(group_id, token, image, image_alt):
@@ -131,6 +151,8 @@ def main():
     try:
         image = save_content(image_url, image_path)
         publish_to_vk(group_id, token, image, image_alt)
+    except requests.HTTPError:
+        raise
     finally:
         os.remove(image)
 
