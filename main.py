@@ -38,9 +38,10 @@ def save_content(url, path):
 
 
 def check_for_vk_error(response):
-    if response.json().get("error"):
-        code = response.json()["error"].get("error_code")
-        msg = response.json()["error"]["error_msg"]
+    error = response.json().get("error")
+    if error:
+        code = error.get("error_code")
+        msg = error["error_msg"]
         return f"[VK Error: {code}] {msg}" if code else msg
     return
 
@@ -156,7 +157,7 @@ def main():
     except requests.HTTPError:
         raise
     finally:
-        os.remove(image)
+        os.remove(image_path)
 
 
 if __name__ == "__main__":
